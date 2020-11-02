@@ -1,0 +1,7 @@
+-dontobfuscate
+-allowaccessmodification
+-keepattributes SourceFile, LineNumberTable
+
+-keep class com.careem.gradle.dependencies.DependencyTreeTldr {
+	public static void main(java.lang.String[]);
+}
