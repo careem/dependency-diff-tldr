@@ -57,12 +57,20 @@ private fun <K, V> mapDifference(from: Map<K, V>, to: Map<K, V>): Map<K, V> {
   return result
 }
 
-private fun partitionDifferences(removed: Map<String, String>, added: Map<String, String>):
-    Triple<List<Pair<String, String>>, List<Pair<String, String>>, List<Pair<String, String>>> {
+data class VersionedDependency(val artifact: String, val version: String)
+data class VersionDifferences(
+  val additions: List<VersionedDependency>,
+  val removals: List<VersionedDependency>,
+  val upgrades: List<VersionedDependency>
+)
 
-  val additions = mutableListOf<Pair<String, String>>()
-  val upgrades = mutableListOf<Pair<String, String>>()
-  val removals = mutableListOf<Pair<String, String>>()
+private fun partitionDifferences(
+  removed: Map<String, String>,
+  added: Map<String, String>
+): VersionDifferences {
+  val additions = mutableListOf<VersionedDependency>()
+  val upgrades = mutableListOf<VersionedDependency>()
+  val removals = mutableListOf<VersionedDependency>()
 
   val mutableRemovedMap = removed.toMutableMap()
   for ((artifact, version) in added) {
@@ -70,25 +78,26 @@ private fun partitionDifferences(removed: Map<String, String>, added: Map<String
     when {
       removedVersion != null -> {
         mutableRemovedMap.remove(artifact)
-        upgrades.add(artifact to "$version, (upgraded from $removedVersion)")
+        upgrades.add(
+          VersionedDependency(artifact, "$version, (upgraded from $removedVersion)"))
       }
       else -> {
-        additions.add(artifact to version)
+        additions.add(VersionedDependency(artifact, version))
       }
     }
   }
 
   for ((artifact, version) in mutableRemovedMap) {
-    removals.add(artifact to version)
+    removals.add(VersionedDependency(artifact, version))
   }
-  return Triple(
-    additions.sortedBy { it.first },
-    removals.sortedBy { it.first },
-    upgrades.sortedBy { it.first }
+  return VersionDifferences(
+    additions.sortedBy { it.artifact },
+    removals.sortedBy { it.artifact },
+    upgrades.sortedBy { it.artifact }
   )
 }
 
-private fun StringBuilder.writeList(title: String, list: List<Pair<String, String>>, newLineBeforeTitle: Boolean = false) {
+private fun StringBuilder.writeList(title: String, list: List<VersionedDependency>, newLineBeforeTitle: Boolean = false) {
   if (list.isNotEmpty()) {
     if (newLineBeforeTitle) {
       append("\n")
@@ -96,10 +105,10 @@ private fun StringBuilder.writeList(title: String, list: List<Pair<String, Strin
     append(title)
     append("\n")
     list.forEach {
-      append(it.first)
-      if (it.second.isNotBlank()) {
+      append(it.artifact)
+      if (it.version.isNotBlank()) {
         append(":")
-        append(it.second)
+        append(it.version)
       }
       append("\n")
     }
