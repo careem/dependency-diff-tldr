@@ -19,8 +19,8 @@ fun main(args: Array<String>) {
     return
   }
 
-  val old = args[0].let(Paths::get).readText()
-  val new = args[1].let(Paths::get).readText()
+  val old = Paths.get(args[0]).readText()
+  val new = Paths.get(args[1]).readText()
 
   print(tldr(old, new))
 }

@@ -1,12 +1,12 @@
 package com.careem.gradle.dependencies
 
 fun tldr(old: String, new: String): String {
-  val oldPaths = mapize(old)
-  val newPaths = mapize(new)
+  val oldDependencies = extractDependencies(old)
+  val newDependencies = extractDependencies(new)
 
-  val removedMap = mapDifference(oldPaths, newPaths)
-  val addedMap = mapDifference(newPaths, oldPaths)
-  val (added, removed, upgraded) = partitionDifferences(removedMap, addedMap)
+  val addedDependencies = newDependencies - oldDependencies
+  val removedDependencies = oldDependencies - newDependencies
+  val (added, removed, upgraded) = partitionDifferences(removedDependencies, addedDependencies)
 
   return buildString {
     writeList("New Dependencies", added)
@@ -15,7 +15,7 @@ fun tldr(old: String, new: String): String {
   }
 }
 
-private fun mapize(deps: String): Map<String, String> {
+private fun extractDependencies(deps: String): Set<VersionedDependency> {
   return deps.split('\n')
     .dropWhile { !it.startsWith("+--- ") }
     .takeWhile { it.isNotEmpty() }
@@ -41,20 +41,9 @@ private fun mapize(deps: String): Map<String, String> {
         "(*)" in versionInfo || "(c)" in versionInfo -> versionInfo.substringBefore(" (")
         else -> versionInfo
       }
-      artifact to canonicalVersionInfo
+      VersionedDependency(artifact, canonicalVersionInfo)
     }
-    .toMap()
-}
-
-private fun <K, V> mapDifference(from: Map<K, V>, to: Map<K, V>): Map<K, V> {
-  val result = mutableMapOf<K, V>()
-  for ((key, value) in from) {
-    val valueInTo = to[key]
-    if (valueInTo == null || valueInTo != value) {
-      result[key] = value
-    }
-  }
-  return result
+    .toSet()
 }
 
 data class VersionedDependency(val artifact: String, val version: String)
@@ -65,14 +54,14 @@ data class VersionDifferences(
 )
 
 private fun partitionDifferences(
-  removed: Map<String, String>,
-  added: Map<String, String>
+  removed: Set<VersionedDependency>,
+  added: Set<VersionedDependency>
 ): VersionDifferences {
   val additions = mutableListOf<VersionedDependency>()
   val upgrades = mutableListOf<VersionedDependency>()
   val removals = mutableListOf<VersionedDependency>()
 
-  val mutableRemovedMap = removed.toMutableMap()
+  val mutableRemovedMap = removed.map { it.artifact to it.version }.toMap(mutableMapOf())
   for ((artifact, version) in added) {
     val removedVersion = mutableRemovedMap[artifact]
     when {
