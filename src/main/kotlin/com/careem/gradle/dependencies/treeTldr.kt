@@ -1,6 +1,6 @@
 package com.careem.gradle.dependencies
 
-fun tldr(old: String, new: String): String {
+fun tldr(old: String, new: String, collapse: List<String>): String {
   val oldDependencies = extractDependencies(old)
   val newDependencies = extractDependencies(new)
 
@@ -11,7 +11,8 @@ fun tldr(old: String, new: String): String {
   return buildString {
     writeList("New Dependencies", added)
     writeList("Removed Dependencies", removed, added.isNotEmpty())
-    writeList("Upgraded Dependencies", upgraded, removed.isNotEmpty() || added.isNotEmpty())
+    writeList("Upgraded Dependencies", collapseDependencies(upgraded, collapse),
+      removed.isNotEmpty() || added.isNotEmpty())
   }
 }
 
@@ -46,6 +47,29 @@ private fun extractDependencies(deps: String): Set<VersionedDependency> {
     .toSet()
 }
 
+private fun collapseDependencies(
+  dependencies: List<VersionedDependency>,
+  collapses: List<String>
+): List<VersionedDependency> {
+  val add = mutableSetOf<VersionedDependency>()
+  val remove = mutableSetOf<VersionedDependency>()
+
+  collapses.forEach { collapse ->
+    val matchingToCollapse = dependencies.filter { it.artifact.startsWith(collapse) }
+    val versions = matchingToCollapse.map { it.version }.toSet().size
+    if (versions == 1) {
+      remove.addAll(matchingToCollapse)
+      add.add(matchingToCollapse[0].copy(artifact = collapse))
+    }
+  }
+
+  return if (add.isNotEmpty()) {
+    (dependencies - remove) + add
+  } else {
+    dependencies
+  }
+}
+
 data class VersionedDependency(val artifact: String, val version: String)
 data class VersionDifferences(
   val additions: List<VersionedDependency>,
@@ -68,7 +92,7 @@ private fun partitionDifferences(
       removedVersion != null -> {
         mutableRemovedMap.remove(artifact)
         upgrades.add(
-          VersionedDependency(artifact, "$version, (upgraded from $removedVersion)"))
+          VersionedDependency(artifact, "$version, (changed from $removedVersion)"))
       }
       else -> {
         additions.add(VersionedDependency(artifact, version))
