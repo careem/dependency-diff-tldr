@@ -67,12 +67,18 @@ The tool parses the output of Gradle's `dependencies` task. Specify `--configura
 $ ./gradlew :app:dependencies --configuration releaseRuntimeClasspath > old.txt
 $ # Update a dependency...
 $ ./gradlew :app:dependencies --configuration releaseRuntimeClasspath > new.txt
-$ ./dependency-diff-tldr.jar old.txt new.txt
+$ java -jar build/dependency-diff-tldr.jar old.txt new.txt
 ```
 
-Until the above actually works, can run:
+## Building
 
 ```bash
+# build
 ./gradlew build
-java -jar build/libs/dependency-diff-tldr-r8.jar old.txt new.txt
+
+# run tests
+./gradlew test
+
+# run it
+java -jar build/dependency-diff-tldr.jar old.txt new.txt
 ```
