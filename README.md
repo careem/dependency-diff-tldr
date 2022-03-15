@@ -1,6 +1,6 @@
 # dependency-diff-tldr
 
-This is a fork of [Jake Wharton's](https://jakewharton.com) [dependency-tree-diff](https://github.com/JakeWharton/dependency-tree-diff) project.
+This started off being heavily based on  [Jake Wharton's](https://jakewharton.com) [dependency-tree-diff](https://github.com/JakeWharton/dependency-tree-diff) project.
 
 Initially, it started as an attempt to add a summary mode to dependency-tree-diff. However, it became apparent that a summary view should be an auxiliary tool to be used in addition to dependency-tree-diff and not a replacement for it, especially since it loses valuable information as to where and why a dependency changed. Because of the numerous changes in code, this is a separate repository for now, and there exists a bunch of common code (ex the gradle scripts, main class, rules, and some of the parsing logic and readme are the same).
 
