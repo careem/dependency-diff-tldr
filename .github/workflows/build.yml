@@ -5,6 +5,29 @@ on:
       - master
 
 jobs:
+  test:
+    needs: [build]
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the code
+        uses: actions/checkout@v2
+
+      - name: Setup JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Run tests
+        run: ./gradlew test
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: unit_test_report
+          path: build/reports/tests/test/
+
   build:
     name: Build
     runs-on: ubuntu-latest
