@@ -1,4 +1,4 @@
-# Dependency Tree Tldr
+# dependency-diff-tldr
 
 This is a fork of [Jake Wharton's](https://jakewharton.com) [dependency-tree-diff](https://github.com/JakeWharton/dependency-tree-diff) project.
 
@@ -67,7 +67,7 @@ The tool parses the output of Gradle's `dependencies` task. Specify `--configura
 $ ./gradlew :app:dependencies --configuration releaseRuntimeClasspath > old.txt
 $ # Update a dependency...
 $ ./gradlew :app:dependencies --configuration releaseRuntimeClasspath > new.txt
-$ ./dependency-tree-tldr.jar old.txt new.txt
+$ ./dependency-diff-tldr.jar old.txt new.txt
 ```
 
 Until the above actually works, can run:
