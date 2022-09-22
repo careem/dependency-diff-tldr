@@ -34,16 +34,18 @@ fun tldr(old: String, new: String, collapse: List<String>): String {
 
 private fun extractDependencies(deps: String): Set<VersionedDependency> {
   return deps.split('\n')
+    .asSequence()
     .dropWhile { !it.startsWith("+--- ") }
     .takeWhile { it.isNotEmpty() }
     .map {
       val artifactStart = it.indexOf("--- ")
-      val artifactBase = it.substring(artifactStart + 4)
+      it.substring(artifactStart + 4)
+    }
+    // ignore added or removed local project modules
+    .filter { !it.startsWith("project ") }
+    .map { artifactBase ->
       val noVersion = artifactBase.indexOf(':') == artifactBase.lastIndexOf(':')
       val artifact = when {
-        artifactBase.startsWith("project ") -> {
-          artifactBase
-        }
         noVersion -> {
           artifactBase.substringBefore(' ')
         }
@@ -51,9 +53,8 @@ private fun extractDependencies(deps: String): Set<VersionedDependency> {
           artifactBase.substringBeforeLast(':')
         }
       }
-      val versionInfo = it.substringAfterLast(':')
+      val versionInfo = artifactBase.substringAfterLast(':')
       val canonicalVersionInfo = when {
-        "project" in artifact -> ""
         "->" in versionInfo -> versionInfo.substringAfter("-> ").substringBefore(' ')
         "(*)" in versionInfo || "(c)" in versionInfo -> versionInfo.substringBefore(" (")
         else -> versionInfo
