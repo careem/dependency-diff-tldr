@@ -11,12 +11,21 @@ import java.io.File
 class FixturesTest(private val fixtureDir: File) {
 
   @Test
-  fun run() {
+  fun testTldr() {
     val before = fixtureDir.resolve("before.txt").readText()
     val after = fixtureDir.resolve("after.txt").readText()
     val expected = fixtureDir.resolve("expected.txt").readText()
     val actual = tldr(before, after, emptyList())
     assertThat(actual).isEqualTo(expected)
+  }
+
+  @Test
+  fun testSideEffects() {
+    val before = fixtureDir.resolve("before.txt").readText()
+    val after = fixtureDir.resolve("after.txt").readText()
+    val expected = fixtureDir.resolve("expected_side_effects.txt").readText()
+    val effects = upgradeEffects(before, after, emptyList())
+    assertThat(effects).isEqualTo(expected)
   }
 
   companion object {
