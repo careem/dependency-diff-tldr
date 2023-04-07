@@ -17,12 +17,7 @@
 package com.careem.gradle.dependencies
 
 fun tldr(old: String, new: String, collapse: List<String>): String {
-  val oldDependencies = extractDependencies(old)
-  val newDependencies = extractDependencies(new)
-
-  val addedDependencies = newDependencies - oldDependencies
-  val removedDependencies = oldDependencies - newDependencies
-  val (added, removed, upgraded) = partitionDifferences(removedDependencies, addedDependencies)
+  val (added, removed, upgraded) = dependencyDifferences(old, new)
 
   return buildString {
     writeList("New Dependencies", added)
@@ -30,6 +25,15 @@ fun tldr(old: String, new: String, collapse: List<String>): String {
     writeList("Upgraded Dependencies", collapseDependencies(upgraded, collapse),
       removed.isNotEmpty() || added.isNotEmpty())
   }
+}
+
+fun dependencyDifferences(old: String, new: String): VersionDifferences {
+  val oldDependencies = extractDependencies(old)
+  val newDependencies = extractDependencies(new)
+
+  val addedDependencies = newDependencies - oldDependencies
+  val removedDependencies = oldDependencies - newDependencies
+  return partitionDifferences(removedDependencies, addedDependencies)
 }
 
 private fun extractDependencies(deps: String): Set<VersionedDependency> {
@@ -87,7 +91,9 @@ private fun collapseDependencies(
   }
 }
 
-data class VersionedDependency(val artifact: String, val version: String)
+data class VersionedDependency(val artifact: String, val version: String) {
+  val group by lazy { artifact.substringBefore(':').trim() }
+}
 data class VersionDifferences(
   val additions: List<VersionedDependency>,
   val removals: List<VersionedDependency>,

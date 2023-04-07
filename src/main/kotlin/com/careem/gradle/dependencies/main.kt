@@ -27,6 +27,8 @@ import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
   val help = "-h" in args || "--help" in args
+  val sideEffects = "-s" in args || "--side-effects" in args
+
   if (help || args.size < 2) {
     System.err.println("Usage: dependency-tree-tldr old.txt new.txt")
     System.err.println("  You can also pass in one or more optional --collapse arguments.")
@@ -52,6 +54,9 @@ fun main(args: Array<String>) {
       "--collapse" == args[index] -> {
         isNextCollapse = true
       }
+      "--side-effects" == args[index] || "-s" == args[index] -> {
+        // do nothing
+      }
       else -> {
         files[filesIndex++] = args[index]
       }
@@ -62,6 +67,14 @@ fun main(args: Array<String>) {
   val new = Paths.get(files[1]).readText()
 
   print(tldr(old, new, collapse))
+  if (sideEffects) {
+    val upgradeEffects = upgradeEffects(old, new, collapse)
+    if (upgradeEffects.isNotEmpty()) {
+      println()
+      println("Upgrade Side Effects")
+      print(upgradeEffects)
+    }
+  }
 }
 
 private fun Path.readText(charset: Charset = StandardCharsets.UTF_8): String {
