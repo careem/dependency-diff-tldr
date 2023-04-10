@@ -31,9 +31,12 @@ fun main(args: Array<String>) {
 
   if (help || args.size < 2) {
     System.err.println("Usage: dependency-tree-tldr old.txt new.txt")
-    System.err.println("  You can also pass in one or more optional --collapse arguments.")
-    System.err.println("  Note that these will only collapse if all version numbers match.")
-    System.err.println("  (ex --collapse com.careem.ridehail --collapse com.careem.now)")
+    System.err.println("  -s, --side-effects")
+    System.err.println("          Print out any side effects of upgrading the dependencies.")
+    System.err.println("  -c, --collapse")
+    System.err.println("          Collapse packages with a matching group under a group.*.")
+    System.err.println("          Collapsing will only occur if all version numbers match.")
+    System.err.println("          (ex --collapse com.careem.ridehail --collapse com.careem.now)")
     if (!help) {
       exitProcess(1)
     }
@@ -51,7 +54,7 @@ fun main(args: Array<String>) {
         collapse.add(args[index])
         isNextCollapse = false
       }
-      "--collapse" == args[index] -> {
+      "--collapse" == args[index] || "-c" == args[index] -> {
         isNextCollapse = true
       }
       "--side-effects" == args[index] || "-s" == args[index] -> {
