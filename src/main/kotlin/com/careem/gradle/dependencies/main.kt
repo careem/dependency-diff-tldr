@@ -18,66 +18,50 @@
 
 package com.careem.gradle.dependencies
 
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.multiple
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.types.path
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
-import kotlin.system.exitProcess
+
+class Tldr : CliktCommand(name = "dependency-diff-tldr") {
+  private val sideEffects by option(
+    "-s",
+    "--side-effects",
+    help = "Print out any side effects of upgrading the dependencies."
+  ).flag()
+  private val collapse: List<String> by option(
+    "-c",
+    "--collapse",
+    help = "Collapse packages with a matching group under a group.*. Collapsing " +
+        "will only occur if all version numbers match. (ex --collapse com.careem.ridehail --collapse com.careem.now)."
+  ).multiple()
+
+  private val old by argument("old.txt").path(mustExist = true)
+  private val new by argument("new.txt").path(mustExist = true)
+
+  override fun run() {
+    val oldContents = old.readText()
+    val newContents = new.readText()
+    print(tldr(oldContents, newContents, collapse))
+    if (sideEffects) {
+      val upgradeEffects = upgradeEffects(oldContents, newContents, collapse)
+      if (upgradeEffects.isNotEmpty()) {
+        println()
+        println("Upgrade Side Effects")
+        print(upgradeEffects)
+      }
+    }
+  }
+}
 
 fun main(args: Array<String>) {
-  val help = "-h" in args || "--help" in args
-  val sideEffects = "-s" in args || "--side-effects" in args
-
-  if (help || args.size < 2) {
-    System.err.println("Usage: dependency-tree-tldr old.txt new.txt")
-    System.err.println("  -s, --side-effects")
-    System.err.println("          Print out any side effects of upgrading the dependencies.")
-    System.err.println("  -c, --collapse")
-    System.err.println("          Collapse packages with a matching group under a group.*.")
-    System.err.println("          Collapsing will only occur if all version numbers match.")
-    System.err.println("          (ex --collapse com.careem.ridehail --collapse com.careem.now)")
-    if (!help) {
-      exitProcess(1)
-    }
-    return
-  }
-
-  val files = arrayOf("", "")
-  val collapse = mutableListOf<String>()
-
-  var filesIndex = 0
-  var isNextCollapse = false
-  args.forEachIndexed { index, _ ->
-    when {
-      isNextCollapse -> {
-        collapse.add(args[index])
-        isNextCollapse = false
-      }
-      "--collapse" == args[index] || "-c" == args[index] -> {
-        isNextCollapse = true
-      }
-      "--side-effects" == args[index] || "-s" == args[index] -> {
-        // do nothing
-      }
-      else -> {
-        files[filesIndex++] = args[index]
-      }
-    }
-  }
-
-  val old = Paths.get(files[0]).readText()
-  val new = Paths.get(files[1]).readText()
-
-  print(tldr(old, new, collapse))
-  if (sideEffects) {
-    val upgradeEffects = upgradeEffects(old, new, collapse)
-    if (upgradeEffects.isNotEmpty()) {
-      println()
-      println("Upgrade Side Effects")
-      print(upgradeEffects)
-    }
-  }
+  Tldr().main(args)
 }
 
 private fun Path.readText(charset: Charset = StandardCharsets.UTF_8): String {
