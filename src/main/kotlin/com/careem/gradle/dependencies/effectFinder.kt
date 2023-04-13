@@ -16,8 +16,8 @@
 
 package com.careem.gradle.dependencies
 
-import com.careem.gradle.dependencies.parser.Dependency
-import com.careem.gradle.dependencies.parser.parseDependencyTree
+import com.careem.gradle.dependencies.common.parser.Dependency
+import com.careem.gradle.dependencies.common.parser.parseDependencyTree
 
 fun upgradeEffects(old: String, new: String, collapseKeys: List<String>): String {
     val (_, _, upgrades) = dependencyDifferences(old, new)

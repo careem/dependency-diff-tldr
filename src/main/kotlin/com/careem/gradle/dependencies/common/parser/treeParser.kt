@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-package com.careem.gradle.dependencies.parser
+package com.careem.gradle.dependencies.common.parser
 
 data class Dependency(
     val group: String,

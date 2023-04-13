@@ -83,6 +83,68 @@ $ java -jar build/dependency-diff-tldr.jar old.txt new.txt
 java -jar build/dependency-diff-tldr.jar old.txt new.txt
 ```
 
+## Flags
+
+* `-s, --side-efects` - explicitly call out the side effects of dependency
+upgrades (ex upgrading Firebase here also updates it in ...)
+* `-c, --collapse` - collapse a set of grouped dependencies. For example,
+  passing a collapse of `com.careem.care` would result in collapsing updates
+  of `com.careem.care:dep1` and `com.careem.care:dep2` to just
+  `com.careem.care:*`. This flag is repeatable.
+
+## Other Utilities
+
+### Mismatched Dependency Finder
+
+Sometimes, you have a library (for example, `androidx.appcompat:appcompat`)
+and want to make sure that all updates that transitively use this library are
+on the currently resolved version. This tool helps by listing out updates and
+additions in this change set that use a version of that library that is
+transitively upgraded.
+
+For example, if our main app uses `androidx.appcompat:appcompat:1.6.1`, using
+this command and passing `androidx.appcompat:appcompat` as a `-d` parameter
+would highlight all transitive usages on a version that is not 1.6.1 that
+resolves to 1.6.1.
+
+```bash
+java -cp build/dependency-diff-tldr.jar com.careem.gradle.dependencies.mismatched.MismatchedVersionFinder -d androidx.appcompat:appcompat old.txt new.txt
+```
+
+Would result in output like:
+
+```
+androidx.appcompat:appcompat:1.5.1:
+    com.careem.kodelean:recyclerview-compose is requesting 1.5.1 instead of 1.6.1
+    com.careem.kodelean:recyclerview-viewbinding is requesting 1.5.1 instead of 1.6.1
+    com.careem.kodelean:viewbinding-lifecycle is requesting 1.5.1 instead of 1.6.1
+
+androidx.appcompat:appcompat:1.3.0:
+    com.careem.motcore:feature-dynamic_widget is requesting 1.3.0 instead of 1.6.1
+```
+
+Note that the `-c` flag would help simplify this output, such that running:
+
+```bash
+java -cp build/dependency-diff-tldr.jar com.careem.gradle.dependencies.mismatched.MismatchedVersionFinder -c com.careem.kodelean -d androidx.appcompat:appcompat old.txt new.txt
+```
+
+Would result in output like:
+
+```
+androidx.appcompat:appcompat:1.5.1:
+    com.careem.kodelean:* is requesting 1.5.1 instead of 1.6.1
+
+androidx.appcompat:appcompat:1.3.0:
+    com.careem.motcore:feature-dynamic_widget is requesting 1.3.0 instead of 1.6.1
+```
+
+#### Flags
+
+* `-d, --dependency` - watch a library. This flag is repeatable.
+* `-c, --collapse` - collapse a set of grouped dependencies. This flag is repeatable.
+
+
 ## Disclaimer
 
 This project may contain experimental code and may not be ready for general use. Support and/or new releases may be limited.
