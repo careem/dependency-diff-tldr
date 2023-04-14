@@ -24,10 +24,7 @@ import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.path
-import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.nio.file.Path
+import kotlin.io.path.readText
 
 class Tldr : CliktCommand(name = "dependency-diff-tldr") {
   private val sideEffects by option(
@@ -62,8 +59,4 @@ class Tldr : CliktCommand(name = "dependency-diff-tldr") {
 
 fun main(args: Array<String>) {
   Tldr().main(args)
-}
-
-private fun Path.readText(charset: Charset = StandardCharsets.UTF_8): String {
-  return Files.readAllBytes(this).toString(charset)
 }
