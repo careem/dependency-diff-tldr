@@ -1,3 +1,19 @@
+/*
+* Copyright Careem, an Uber Technologies Inc. company
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
 package com.careem.gradle.dependencies.mismatched
 
 import com.careem.gradle.dependencies.dependencyDifferences
@@ -11,14 +27,16 @@ fun mismatchedVersions(old: String, new: String, watchedLibraries: List<String>,
     val tree = parseDependencyTree(new)
     val upgradedDependencies = total.mapNotNull { tree.findDependency(it.artifact) }
     val updatesList = watchedLibraries.map { watchedArtifact ->
-      watchedArtifact to upgradedDependencies.mapNotNull { dep ->
-        val matching = dep.findDependency(watchedArtifact)
-        if (matching != null && matching.requestedVersion != matching.resolvedVersion) {
-          dep to matching
-        } else {
-          null
+      watchedArtifact to upgradedDependencies
+        .filter { it.artifact != watchedArtifact }
+        .mapNotNull { dep ->
+          val matching = dep.findDependency(watchedArtifact)
+          if (matching != null && matching.requestedVersion != matching.resolvedVersion) {
+            dep to matching
+          } else {
+            null
+          }
         }
-      }
     }
 
     buildString {
