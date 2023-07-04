@@ -65,7 +65,7 @@ fun upgradeEffects(old: String, new: String, collapseKeys: List<String>): String
                     if (index > 0) {
                         appendLine()
                     }
-                    append("Changing ${effects.first.artifact} to ${effects.first.version} will also change:")
+                    append("Changing ${effects.first.artifact} to ${effects.first.version}${effects.first.alternativeVersion?.let { ", (changed from $it)"}} will also change:")
                     effects.second
                         .forEach { affectedDependency -> writeTree(affectedDependency, 1) }
                     appendLine()

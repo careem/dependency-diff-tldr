@@ -16,15 +16,8 @@
 
 package com.careem.gradle.dependencies
 
-fun tldr(old: String, new: String, collapse: List<String>): String {
-  val (added, removed, upgraded) = dependencyDifferences(old, new)
-
-  return buildString {
-    writeList("New Dependencies", added)
-    writeList("Removed Dependencies", removed, added.isNotEmpty())
-    writeList("Upgraded Dependencies", collapseDependencies(upgraded, collapse),
-      removed.isNotEmpty() || added.isNotEmpty())
-  }
+fun tldr(old: String, new: String): VersionDifferences {
+  return dependencyDifferences(old, new)
 }
 
 fun dependencyDifferences(old: String, new: String): VersionDifferences {
@@ -68,30 +61,7 @@ private fun extractDependencies(deps: String): Set<VersionedDependency> {
     .toSet()
 }
 
-private fun collapseDependencies(
-  dependencies: List<VersionedDependency>,
-  collapses: List<String>
-): List<VersionedDependency> {
-  val add = mutableSetOf<VersionedDependency>()
-  val remove = mutableSetOf<VersionedDependency>()
-
-  collapses.forEach { collapse ->
-    val matchingToCollapse = dependencies.filter { it.artifact.startsWith(collapse) }
-    val versions = matchingToCollapse.map { it.version }.toSet().size
-    if (versions == 1) {
-      remove.addAll(matchingToCollapse)
-      add.add(matchingToCollapse[0].copy(artifact = collapse))
-    }
-  }
-
-  return if (add.isNotEmpty()) {
-    (dependencies - remove) + add
-  } else {
-    dependencies
-  }
-}
-
-data class VersionedDependency(val artifact: String, val version: String) {
+data class VersionedDependency(val artifact: String, val version: String, val alternativeVersion: String? = null) {
   val group by lazy { artifact.substringBefore(':').trim() }
 }
 data class VersionDifferences(
@@ -115,7 +85,7 @@ private fun partitionDifferences(
       removedVersion != null -> {
         mutableRemovedMap.remove(artifact)
         upgrades.add(
-          VersionedDependency(artifact, "$version, (changed from $removedVersion)"))
+          VersionedDependency(artifact, version, alternativeVersion = removedVersion))
       }
       else -> {
         additions.add(VersionedDependency(artifact, version))
@@ -133,20 +103,4 @@ private fun partitionDifferences(
   )
 }
 
-private fun StringBuilder.writeList(title: String, list: List<VersionedDependency>, newLineBeforeTitle: Boolean = false) {
-  if (list.isNotEmpty()) {
-    if (newLineBeforeTitle) {
-      append("\n")
-    }
-    append(title)
-    append("\n")
-    list.forEach {
-      append(it.artifact)
-      if (it.version.isNotBlank()) {
-        append(":")
-        append(it.version)
-      }
-      append("\n")
-    }
-  }
-}
+

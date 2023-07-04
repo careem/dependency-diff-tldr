@@ -91,6 +91,7 @@ upgrades (ex upgrading Firebase here also updates it in ...)
   passing a collapse of `com.careem.care` would result in collapsing updates
   of `com.careem.care:dep1` and `com.careem.care:dep2` to just
   `com.careem.care:*`. This flag is repeatable.
+* `-o, --output` - output type, you can pass `plain` or `json`, `plain` is the default argument
 
 ## Other Utilities
 

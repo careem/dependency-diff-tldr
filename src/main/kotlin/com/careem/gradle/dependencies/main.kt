@@ -20,6 +20,7 @@ package com.careem.gradle.dependencies
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.flag
 import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
@@ -38,6 +39,11 @@ class Tldr : CliktCommand(name = "dependency-diff-tldr") {
     help = "Collapse packages with a matching group under a group.*. Collapsing " +
         "will only occur if all version numbers match. (ex --collapse com.careem.ridehail --collapse com.careem.now)."
   ).multiple()
+  private val output by option(
+    "-o",
+    "--output",
+    help = "Output type, \"plain\" and \"json\" are supported"
+  ).default("plain")
 
   private val old by argument("old.txt").path(mustExist = true)
   private val new by argument("new.txt").path(mustExist = true)
@@ -45,7 +51,7 @@ class Tldr : CliktCommand(name = "dependency-diff-tldr") {
   override fun run() {
     val oldContents = old.readText()
     val newContents = new.readText()
-    print(tldr(oldContents, newContents, collapse))
+    print(tldr(oldContents, newContents), collapse, outputType = output.toOutputType())
     if (sideEffects) {
       val upgradeEffects = upgradeEffects(oldContents, newContents, collapse)
       if (upgradeEffects.isNotEmpty()) {
