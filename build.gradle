@@ -1,10 +1,17 @@
 buildscript {
-  dependencies {
-    classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.20'
+  repositories {
+    mavenCentral()
   }
 }
 
-apply plugin: 'org.jetbrains.kotlin.jvm'
+plugins {
+  id 'org.jetbrains.kotlin.jvm' version "1.8.20"
+  id 'application'
+}
+
+application {
+   mainClass = 'com.careem.gradle.dependencies.DependencyTreeTldr'
+}
 
 configurations {
   r8
@@ -88,11 +95,6 @@ artifacts {
   archives file: binaryFile, name: 'binary', type: 'jar', builtBy: binaryJar, classifier: 'binary'
 }
 
-buildscript {
-  repositories {
-    mavenCentral()
-  }
-}
 repositories {
   mavenCentral()
   google()
