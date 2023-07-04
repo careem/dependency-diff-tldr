@@ -9,10 +9,10 @@ fun String.toOutputType(): OutputType = when(this){
 }
 
 
-fun print(versionDifferences: VersionDifferences, collapse: List<String>, outputType: OutputType): String {
+fun VersionDifferences.toString(collapse: List<String>, outputType: OutputType): String {
     return when(outputType){
-        OutputType.PLAIN -> writePlain(versionDifferences, collapse)
-        OutputType.JSON -> writeJson(versionDifferences, collapse)
+        OutputType.PLAIN -> writePlain(this, collapse)
+        OutputType.JSON -> writeJson(this, collapse)
     }
 }
 

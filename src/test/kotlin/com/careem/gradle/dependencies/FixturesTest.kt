@@ -15,7 +15,7 @@ class FixturesTest(private val fixtureDir: File) {
     val before = fixtureDir.resolve("before.txt").readText()
     val after = fixtureDir.resolve("after.txt").readText()
     val expected = fixtureDir.resolve("expected.txt").readText()
-    val actual = print(tldr(before, after), collapse = emptyList(), outputType = OutputType.PLAIN)
+    val actual = tldr(before, after).toString(collapse = emptyList(), outputType = OutputType.PLAIN)
     assertThat(actual).isEqualTo(expected)
   }
 
@@ -24,7 +24,7 @@ class FixturesTest(private val fixtureDir: File) {
     val before = fixtureDir.resolve("before.txt").readText()
     val after = fixtureDir.resolve("after.txt").readText()
     val expected = fixtureDir.resolve("expected_json.json").readText()
-    val actual = print(tldr(before, after), collapse = emptyList(), outputType = OutputType.JSON)
+    val actual = tldr(before, after).toString(collapse = emptyList(), outputType = OutputType.JSON)
     assertThat(actual).isEqualTo(expected)
   }
 

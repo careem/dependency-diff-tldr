@@ -51,7 +51,7 @@ class Tldr : CliktCommand(name = "dependency-diff-tldr") {
   override fun run() {
     val oldContents = old.readText()
     val newContents = new.readText()
-    print(tldr(oldContents, newContents), collapse, outputType = output.toOutputType())
+    print(tldr(oldContents, newContents).toString(collapse, outputType = output.toOutputType()))
     if (sideEffects) {
       val upgradeEffects = upgradeEffects(oldContents, newContents, collapse)
       if (upgradeEffects.isNotEmpty()) {
