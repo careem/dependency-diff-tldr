@@ -85,7 +85,7 @@ java -jar build/dependency-diff-tldr.jar old.txt new.txt
 
 ## Flags
 
-* `-s, --side-efects` - explicitly call out the side effects of dependency
+* `-s, --side-effects` - explicitly call out the side effects of dependency
 upgrades (ex upgrading Firebase here also updates it in ...)
 * `-c, --collapse` - collapse a set of grouped dependencies. For example,
   passing a collapse of `com.careem.care` would result in collapsing updates
