@@ -16,8 +16,10 @@
 
 package com.careem.gradle.dependencies
 
+import com.careem.gradle.dependencies.common.filterMatches
 import com.careem.gradle.dependencies.common.parser.Dependency
 import com.careem.gradle.dependencies.common.parser.parseDependencyTree
+import com.careem.gradle.dependencies.common.writeTree
 
 fun upgradeEffects(old: String, new: String, collapseKeys: List<String>): String {
     val (_, _, upgrades) = dependencyDifferences(old, new)
@@ -76,27 +78,4 @@ fun upgradeEffects(old: String, new: String, collapseKeys: List<String>): String
     }
 }
 
-private fun Dependency.matches(target: String) = artifact == target
-
-private fun Dependency.filterMatches(lambda: (Dependency) -> Boolean): Dependency? {
-    return if (lambda(this)) {
-        this.copy(children = emptyList())
-    } else {
-        val children = this.children.mapNotNull { it.filterMatches(lambda) }
-        if (children.isNotEmpty()) {
-            this.copy(children = children)
-        } else {
-            null
-        }
-    }
-}
-
-private fun StringBuilder.writeTree(dependency: Dependency, indent: Int) {
-    appendLine()
-    append(" ".repeat(indent * 4))
-    append(dependency.artifact)
-    append(" (")
-    append(dependency.resolvedVersion)
-    append(")")
-    dependency.children.forEach { writeTree(it, indent + 1) }
-}
+internal fun Dependency.matches(target: String) = artifact == target

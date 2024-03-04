@@ -145,6 +145,32 @@ androidx.appcompat:appcompat:1.3.0:
 * `-d, --dependency` - watch a library. This flag is repeatable.
 * `-c, --collapse` - collapse a set of grouped dependencies. This flag is repeatable.
 
+### Illegal Dependencies Finder
+
+There are often times when a certain specific version of a dependency should not be used,
+due for example to it being broken or having some sort of issues. This tool checks to see
+if any of a set of illegal dependencies are used, and flags their usages.
+
+```bash
+java -cp build/dependency-diff-tldr.jar com.careem.gradle.dependencies.denylist.DenyListEnforcer \
+    dependencies.txt \
+    -d com.careem.superapp.test:example:1.62.0 \
+    -d com.careem.superapp.test:another:1.62.0
+```
+
+Would result in output like:
+
+```
+Illegal dependency: com.careem.superapp.test:example:1.62.0:
+    com.careem.superapp.test:example (1.62.0)
+
+    project:lib:base (base)
+        project:lib:analytics-impl (analytics-impl)
+            com.careem.superapp.test:example (1.62.0)
+```
+
+Alternatively, you can pass in `-df <illegal.txt>`, where `illegal.txt` would contain
+one line per illegal dependency.
 
 ## Disclaimer
 

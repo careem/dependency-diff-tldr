@@ -9,3 +9,7 @@
 -keep class com.careem.gradle.dependencies.mismatched.MismatchedVersionFinder {
 	public static void main(java.lang.String[]);
 }
+
+-keep class com.careem.gradle.dependencies.denylist.DenyListEnforcer {
+	public static void main(java.lang.String[]);
+}
